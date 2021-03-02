@@ -49,10 +49,11 @@ defmodule Tailwind.Phoenix.Index do
       def handle_info({:deleted, unquote(data_pattern) = data} = msg, socket) do
         if socket.assigns[unquote(assign_key)] != nil do
           to = unquote(return_to_fn).(socket)
+
           {:noreply,
-            socket
-            |> Tailwind.Phoenix.redirect_if_id(socket.assigns[unquote(assign_key)].id, data, to: to)
-            |> unquote(notifier).to_flash(msg)}
+           socket
+           |> Tailwind.Phoenix.redirect_if_id(socket.assigns[unquote(assign_key)].id, data, to: to)
+           |> unquote(notifier).to_flash(msg)}
         else
           {:noreply, socket}
         end

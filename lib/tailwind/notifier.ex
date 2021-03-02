@@ -30,8 +30,7 @@ defmodule Tailwind.Notifier do
   You can now use this Notfier in `Tailwind.Phoenix.Show` and `Tailwind.Phoenix.Index`.
   """
 
-
-  @callback action_to_icon(any) :: String.t
+  @callback action_to_icon(any) :: String.t()
 
   @doc """
   When used, implements Helpers for notifications.
@@ -44,22 +43,24 @@ defmodule Tailwind.Notifier do
 
       defp gettext(msg, opts \\ []), do: Gettext.gettext(unquote(gettext), msg, opts)
 
-      defp key, do: DateTime.utc_now()
-              |> DateTime.to_unix(:nanosecond)
-              |> Integer.to_string()
+      defp key,
+        do:
+          DateTime.utc_now()
+          |> DateTime.to_unix(:nanosecond)
+          |> Integer.to_string()
 
       def to_flash(%LiveView.Socket{} = socket, {:error, data, message}) do
         case model_id_name_link(data) do
           {model, id, name, _link} ->
-            subject = gettext("Error while modifying %{model} %{name}",
-              [model: model, name: name])
+            subject = gettext("Error while modifying %{model} %{name}", model: model, name: name)
 
             payload = %{
               icon: action_to_icon(:error),
               subject: subject,
               message: message,
-              close: gettext("Close"),
+              close: gettext("Close")
             }
+
             LiveView.put_flash(socket, "error-#{id}", payload)
 
           :bad_model ->
@@ -71,14 +72,21 @@ defmodule Tailwind.Notifier do
       def to_flash(%LiveView.Socket{} = socket, {action, data}) do
         case model_id_name_link(data) do
           {model, id, name, link} ->
-            subject = gettext(
-              "%{model} %{name} %{action} successfully",
-              [model: model, name: name, action: gettext(Atom.to_string(action))]
-            )
-            message = gettext(
-              "The %{model} with the ID %{id} has been %{action}",
-              [model: model, id: id, action: gettext(Atom.to_string(action))]
-            )
+            subject =
+              gettext(
+                "%{model} %{name} %{action} successfully",
+                model: model,
+                name: name,
+                action: gettext(Atom.to_string(action))
+              )
+
+            message =
+              gettext(
+                "The %{model} with the ID %{id} has been %{action}",
+                model: model,
+                id: id,
+                action: gettext(Atom.to_string(action))
+              )
 
             button = ~E"""
               <i class="fa fa-eye mr-2"></i><%= gettext("View") %>
@@ -88,11 +96,13 @@ defmodule Tailwind.Notifier do
               icon: action_to_icon(action),
               subject: subject,
               message: message,
-              close: gettext("Close"),
+              close: gettext("Close")
             }
-            payload = if action == :deleted,
-                         do: payload,
-                         else: Map.put(payload, :button, {button, link})
+
+            payload =
+              if action == :deleted,
+                do: payload,
+                else: Map.put(payload, :button, {button, link})
 
             LiveView.put_flash(socket, "#{action}-#{id}", payload)
 
@@ -103,7 +113,7 @@ defmodule Tailwind.Notifier do
       end
 
       def handle_info({action, _data} = msg, socket) when is_atom(action),
-          do: {:noreply, to_flash(socket, msg)}
+        do: {:noreply, to_flash(socket, msg)}
     end
   end
 
