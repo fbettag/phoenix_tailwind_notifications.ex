@@ -43,11 +43,17 @@ defmodule Tailwind.Notifier do
 
       defp gettext(msg, opts \\ []), do: Gettext.gettext(unquote(gettext), msg, opts)
 
-      defp key,
-        do:
-          DateTime.utc_now()
-          |> DateTime.to_unix(:nanosecond)
-          |> Integer.to_string()
+      def to_flash(%LiveView.Socket{} = socket, {:error, subject, message})
+          when is_binary(subject) do
+        payload = %{
+          icon: action_to_icon(:error),
+          subject: subject,
+          message: message,
+          close: gettext("Close")
+        }
+
+        LiveView.put_flash(socket, "error-#{:rand.uniform(100)}", payload)
+      end
 
       def to_flash(%LiveView.Socket{} = socket, {:error, data, message}) do
         case model_id_name_link(data) do

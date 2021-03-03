@@ -9,7 +9,7 @@ This package can be installed by adding `phoenix_tailwind_notifications` to your
 ```elixir
 def deps do
   [
-    {:phoenix_tailwind_notifications, "~> 0.1.1"}
+    {:phoenix_tailwind_notifications, "~> 0.1"}
   ]
 end
 ```
