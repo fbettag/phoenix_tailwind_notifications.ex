@@ -23,7 +23,7 @@ defmodule Tailwind.Notifier do
     defp model_id_name_link(%My.Accounts.User{id: id, name: name}), do: {gettext("User"), id, name, Routes...}
     defp model_id_name_link(%My.Customers.Customer{id: id, name: name}), do: {gettext("Customer"), id, name, Routes...}
 
-    defp model_id_name_link(_), do: :bad_model
+    defp model_id_name_link(data), do: {:bad_model, data}
   end
   ```
 
@@ -43,39 +43,50 @@ defmodule Tailwind.Notifier do
 
       defp gettext(msg, opts \\ []), do: Gettext.gettext(unquote(gettext), msg, opts)
 
-      def to_flash(%LiveView.Socket{} = socket, {:error, subject, message})
-          when is_binary(subject) do
-        payload = %{
+      @doc """
+      Puts a flash on the given socket or conn.
+      """
+      def to_flash(conn_or_socket, msg), do: put_flash(conn_or_socket, format_flash(msg))
+
+      defp put_flash(conn_or_socket, {:bad_model, data}) do
+        Logger.error("Got unhandled Notifier data: #{inspect(data)}")
+        conn_or_socket
+      end
+
+      defp put_flash(%Plug.Conn{} = conn, flash),
+        do: Phoenix.Controller.put_flash(conn, flash.id, flash)
+
+      defp put_flash(%LiveView.Socket{} = socket, flash),
+        do: LiveView.put_flash(socket, flash.id, flash)
+
+      def format_flash({:error, subject, message}) when is_binary(subject) do
+        %{
+          id: "error-#{:rand.uniform(100)}",
           icon: action_to_icon(:error),
           subject: subject,
           message: message,
           close: gettext("Close")
         }
-
-        LiveView.put_flash(socket, "error-#{:rand.uniform(100)}", payload)
       end
 
-      def to_flash(%LiveView.Socket{} = socket, {:error, data, message}) do
+      def format_flash({:error, data, message}) do
         case model_id_name_link(data) do
           {model, id, name, _link} ->
             subject = gettext("Error while modifying %{model} %{name}", model: model, name: name)
 
-            payload = %{
+            %{
               icon: action_to_icon(:error),
               subject: subject,
               message: message,
               close: gettext("Close")
             }
 
-            LiveView.put_flash(socket, "error-#{id}", payload)
-
-          :bad_model ->
-            Logger.error("Got unhandled Notifier data: #{inspect(data)}")
-            socket
+          other ->
+            other
         end
       end
 
-      def to_flash(%LiveView.Socket{} = socket, {action, data}) do
+      def format_flash({action, data}) do
         case model_id_name_link(data) do
           {model, id, name, link} ->
             subject =
@@ -99,22 +110,19 @@ defmodule Tailwind.Notifier do
             """
 
             payload = %{
+              id: "#{action}-#{id}",
               icon: action_to_icon(action),
               subject: subject,
               message: message,
               close: gettext("Close")
             }
 
-            payload =
-              if action == :deleted,
-                do: payload,
-                else: Map.put(payload, :button, {button, link})
+            if action == :deleted,
+              do: payload,
+              else: Map.put(payload, :button, {button, link})
 
-            LiveView.put_flash(socket, "#{action}-#{id}", payload)
-
-          :bad_model ->
-            Logger.error("Got unhandled Notifier data: #{inspect(data)}")
-            socket
+          other ->
+            other
         end
       end
 
@@ -173,11 +181,11 @@ defmodule Tailwind.Notifier do
             <div class="flex flex-col divide-y divide-gray-200">
               <%= if Map.has_key?(flash, :button) do %>
                 <div class="h-0 flex-1 flex">
-                  <%= link elem(flash.button, 0), to: elem(flash.button, 1), class: "view" %>
+                  <%= link elem(flash.button, 0), to: elem(flash.button, 1), class: "btn-primary" %>
                 </div>
               <% end %>
               <div class="h-0 flex-1 flex">
-                <button x-on:click="show = false" class="close">
+                <button x-on:click="show = false" class="btn-warn">
                   <i class="fa fa-times mr-2"></i> <%= flash.close %>
                 </button>
               </div>
