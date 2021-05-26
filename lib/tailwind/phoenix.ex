@@ -12,9 +12,6 @@ defmodule Tailwind.Phoenix do
       else: socket
   end
 
-  @doc """
-  Helper function to redirect if its id matches the given id for the given name, this one does nothing.
-  """
   def redirect_if_id(socket, _, _, _), do: socket
 
   @doc """
@@ -26,8 +23,5 @@ defmodule Tailwind.Phoenix do
       else: socket
   end
 
-  @doc """
-  Helper function to update object if its id matches the given id for the given name, this one does nothing.
-  """
   def update_if_id(socket, _, _, _), do: socket
 end

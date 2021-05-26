@@ -146,9 +146,6 @@ defmodule Tailwind.Notifier do
   """
   def flash_live_errors(nil), do: ~E""
 
-  @doc """
-  Renders live flash errors as drop in notifications.
-  """
   def flash_live_errors(flashes) do
     ~E"""
     <div class="notifications">
