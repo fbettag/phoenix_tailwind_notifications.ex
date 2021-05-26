@@ -41,9 +41,9 @@ defmodule Tailwind.Phoenix.Combined do
 
     quote do
       @impl true
-      def handle_info({_, unquote(data_pattern)} = msg, socket) do
+      def handle_info({_, unquote(data_pattern) = data} = msg, socket) do
         socket =
-          if socket.assigns[show_assign_key] == nil do
+          if socket.assigns[unquote(show_assign_key)] == nil do
             socket
           else
             socket
@@ -56,7 +56,7 @@ defmodule Tailwind.Phoenix.Combined do
           end
 
         socket =
-          if socket.assigns[index_assign_key] == nil do
+          if socket.assigns[unquote(index_assign_key)] == nil do
             socket
           else
             socket
@@ -70,7 +70,7 @@ defmodule Tailwind.Phoenix.Combined do
       @impl true
       def handle_info({:deleted, unquote(data_pattern) = data} = msg, socket) do
         socket =
-          if socket.assigns[show_assign_key] == nil do
+          if socket.assigns[unquote(show_assign_key)] == nil do
             socket
           else
             to = unquote(return_to_fn).(socket)
@@ -83,7 +83,7 @@ defmodule Tailwind.Phoenix.Combined do
           end
 
         socket =
-          if socket.assigns[index_assign_key] == nil do
+          if socket.assigns[unquote(index_assign_key)] == nil do
             socket
           else
             socket
@@ -94,7 +94,7 @@ defmodule Tailwind.Phoenix.Combined do
         {:noreply, socket}
       end
 
-      defdelegate handle_info(msg, socket), to: unquote(notifier)
+      defdelegate handle_info(data, socket), to: unquote(notifier)
     end
   end
 end
