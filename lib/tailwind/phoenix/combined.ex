@@ -41,18 +41,18 @@ defmodule Tailwind.Phoenix.Combined do
 
     quote do
       @impl true
-      def handle_info({_, unquote(data_pattern) = data} = msg, socket) do
+      def handle_info({:deleted, unquote(data_pattern) = data} = msg, socket) do
         socket =
           if socket.assigns[unquote(show_assign_key)] == nil do
             socket
           else
+            to = unquote(return_to_fn).(socket)
+
             socket
-            |> unquote(notifier).to_flash(msg)
-            |> Tailwind.Phoenix.update_if_id(
-              unquote(show_assign_key),
-              socket.assigns[unquote(show_assign_key)].id,
-              data
+            |> Tailwind.Phoenix.redirect_if_id(socket.assigns[unquote(show_assign_key)].id, data,
+              to: to
             )
+            |> unquote(notifier).to_flash(msg)
           end
 
         socket =
@@ -68,18 +68,26 @@ defmodule Tailwind.Phoenix.Combined do
       end
 
       @impl true
-      def handle_info({:deleted, unquote(data_pattern) = data} = msg, socket) do
+      def handle_info({action, unquote(data_pattern) = data} = msg, socket) do
+        IO.puts("HERE REALLY: #{action}")
+
         socket =
           if socket.assigns[unquote(show_assign_key)] == nil do
             socket
           else
-            to = unquote(return_to_fn).(socket)
+            IO.puts(
+              "AM HERE and checking if #{socket.assigns[unquote(show_assign_key)].id} == #{
+                data.id
+              }"
+            )
 
             socket
-            |> Tailwind.Phoenix.redirect_if_id(socket.assigns[unquote(show_assign_key)].id, data,
-              to: to
-            )
             |> unquote(notifier).to_flash(msg)
+            |> Tailwind.Phoenix.update_if_id(
+              unquote(show_assign_key),
+              socket.assigns[unquote(show_assign_key)].id,
+              data
+            )
           end
 
         socket =
