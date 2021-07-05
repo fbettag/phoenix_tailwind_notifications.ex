@@ -69,18 +69,10 @@ defmodule Tailwind.Phoenix.Combined do
 
       @impl true
       def handle_info({action, unquote(data_pattern) = data} = msg, socket) do
-        IO.puts("HERE REALLY: #{action}")
-
         socket =
           if socket.assigns[unquote(show_assign_key)] == nil do
             socket
           else
-            IO.puts(
-              "AM HERE and checking if #{socket.assigns[unquote(show_assign_key)].id} == #{
-                data.id
-              }"
-            )
-
             socket
             |> unquote(notifier).to_flash(msg)
             |> Tailwind.Phoenix.update_if_id(
