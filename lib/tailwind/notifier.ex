@@ -132,6 +132,7 @@ defmodule Tailwind.Notifier do
   end
 
   use Phoenix.HTML
+  import Phoenix.LiveView.Helpers
 
   @doc """
   Renders flash errors as drop in notifications.
@@ -144,13 +145,14 @@ defmodule Tailwind.Notifier do
   @doc """
   Renders live flash errors as drop in notifications.
   """
-  def flash_live_errors(nil), do: ~E""
+  def flash_live_errors(nil), do: nil
 
   def flash_live_errors(flashes) do
-    ~E"""
+    assigns = %{}
+    ~H"""
     <div class="notifications">
       <%= for {id, flash} <- flashes do %>
-        <div class="notification" id="notification-<%= id %>" x-data="{ show: false }" x-show="show"
+        <div class="notification" id={"notification-#{id}"} x-data="{ show: false }" x-show="show"
           x-init="setTimeout(() => show = true, 10); setTimeout(() => show = false, 30000); "
           x-transition:enter="transition transform ease-out duration-300"
           x-transition:enter-start="opacity-0 translate-y-1"
@@ -162,7 +164,7 @@ defmodule Tailwind.Notifier do
           <div class="w-0 flex-1 p-4">
             <div class="flex items-start">
               <div class="flex-shrink-0 pt-0.5">
-                <i class="<%= Map.get(flash, :icon, "") %>"></i>
+                <i class={Map.get(flash, :icon, "")}></i>
               </div>
               <div class="content">
                 <%= if Map.has_key?(flash, :subject) do %>
