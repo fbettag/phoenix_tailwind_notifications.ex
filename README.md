@@ -9,7 +9,7 @@ This package can be installed by adding `phoenix_tailwind_notifications` to your
 ```elixir
 def deps do
   [
-    {:phoenix_tailwind_notifications, "~> 0.1"}
+    {:phoenix_tailwind_notifications, "~> 0.2"}
   ]
 end
 ```
@@ -18,8 +18,6 @@ end
 
 ```elixir
 defmodule MyWeb.Notifier do
-  use Tailwind.Notifier, MyWeb.Gettext
-
   defp model_id_name_link(%My.Accounts.User{id: id, name: name}), do: {gettext("User"), id, name, Routes...}
   defp model_id_name_link(%My.Customers.Customer{id: id, name: name}), do: {gettext("Customer"), id, name, Routes...}
 
